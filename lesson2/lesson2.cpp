@@ -5,6 +5,9 @@
 #include <fstream>
 #include <locale>
 #include <vector>
+#include <algorithm>
+#include "Timer.hpp"
+#include <string_view>
 
 using namespace std;
 
@@ -53,7 +56,19 @@ void Zadanie1()
 };
 
 template<class Type>
-void SortPointers(vector)
+void SortPointers(vector<Type*> &vectroForSort)
+{
+    sort(vectroForSort.begin(), vectroForSort.end(), [](const Type* left, const Type* right) {return *left < *right; });
+}
+
+template<class Type>
+void printVector(const vector<Type*>& vectorForPrint)
+{
+    for (const auto elem : vectorForPrint)
+    {
+        cout << *elem << " ";
+    }
+}
 void Zadanie2()
 {
     /*--------------------------------------------------
@@ -61,17 +76,124 @@ void Zadanie2()
     и сортирует указатели по значениям, на которые они указывают.
     ----------------------------------------------------*/
    
-
+    vector<int*> myVector = { new int{5}, new int{2}, new int{-10}, new int{100}, new int{55} };
+    printVector(myVector);
+    cout << endl;
+    SortPointers(myVector);
+    cout << "After sort" << endl;
+    printVector(myVector);
 
 };
 
+string readFile(const string& fileName) {
+    std::ifstream f(fileName);
+    f.seekg(0, ios::end);
+    size_t size = f.tellg();
+    string s(size, ' ');
+    f.seekg(0);
+    f.read(&s[0], size); // по стандарту можно в C++11, по факту работает и на старых компиляторах
+    return s;
+}
+
+void Variant1(const string_view& s, const string_view& vowels)
+{   
+    cout << endl;
+    Timer  timer1;
+    timer1.start("1");
+    int count1 = count_if(s.begin(), s.end(), [&](const auto& symbol)
+        {
+            return vowels.find(symbol) != string::npos;
+        });
+    cout << "1 variant - " << count1 << "vowels" << endl;
+    timer1.print();
+}
+
+void Variant2(const string_view& s, const string_view& vowels)
+{
+    //○      count_if и цикл for
+    cout << endl;
+    Timer  timer2;
+    timer2.start("2");
+    int count2 = count_if(s.begin(), s.end(), [&](const auto& symbol)
+        {
+            for (size_t i = 0; i < vowels.size(); i++)
+            {
+                if (vowels[i] == symbol)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        });
+    cout << "2 variant - " << count2 << "vowels" << endl;
+    timer2.print();
+}
+
+void Variant3(const string_view& s, const string_view& vowels)
+{
+    cout << endl;
+    Timer  timer3;
+    timer3.start("3");
+    int k3{ 0 };
+    for (size_t i = 0; i < s.size(); i++)
+    {
+        if (vowels.find(s[i]) != string::npos) k3++;
+    }
+    cout << "3 variant - " << k3 << "vowels" << endl;
+    timer3.print();
+}
+void Variant4(const string_view& s, const string_view& vowels)
+{
+    cout << endl;
+    Timer  timer4;
+    timer4.start("4");
+
+    int k4{ 0 };
+    for (size_t i = 0; i < s.length(); i++)
+        for (size_t j = 0; j < vowels.length(); j++)
+        {
+            if (s[i] == vowels[j])
+            {
+                k4++;
+                break;
+            }
+        }
+    cout << "4 variant - " << k4 << "vowels" << endl;
+    timer4.print();
+}
 void Zadanie3()
 {
     /*--------------------------------------------------
-   
-    ----------------------------------------------------*/
-    
+    Подсчитайте количество гласных букв в книге “Война и мир”. Для подсчета используйте 4 способа:
+        ○      count_if и find
+        ○      count_if и цикл for
+        ○      цикл for и find
+        ○      2 цикла for
+        Замерьте время каждого способа подсчета и сделайте выводы.
+        Справка:
+        count_if - это алгоритмическая функция из STL, которая принимает 3 параметра:
+        итератор на начало, итератор на конец и унарный предикат (функцию, принимающую один параметр и возвращающую тип bool).
 
+        find - это метод класса string, который возвращает позицию символа (строки),
+        переданного в качестве параметра, в исходной строке. Если символ не найден, то метод возвращает string::npos.
+
+    ----------------------------------------------------*/
+    string s = readFile("WarAndPeace.txt");
+    //vector<char> vowels = {'а','А','Е', 'е','Ё', 'ё','И','и','О','о','У', 'у','Э', 'э','Ю','ю','Я','я','Ы','ы'};
+    const string_view vowels{ "аАЕеЁёИиОоУуЭэЮюЯяЫы" };
+    //1 
+    Variant1(s, vowels);
+    
+    //2
+    Variant2(s, vowels);
+    //3
+    Variant3(s,vowels);
+    //4
+
+    Variant4(s, vowels);
 };
 
 
